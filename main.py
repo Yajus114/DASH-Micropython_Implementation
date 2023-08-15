@@ -5,7 +5,7 @@ from pprint import pprint
 
 _SSID = "YOUR_WIFI_SSID"
 _KEY = "YOUR_WIFI_PASSWORD"
-_FIREBASE_URL = "https://dash-24-default-rtdb.asia-southeast1.firebasedatabase.app/"
+_FIREBASE_URL = "YOUR_FIREBASE_URL"
 _MAX_ATTEMPT_LIMIT = 15
 _led = Pin(2, Pin.OUT)
 
