@@ -1,5 +1,6 @@
 # DASH-Micropython_Implementation
-Device Automation System for Homes (DASH) code using Micropython libraries
+Device Automation System for Homes (DASH) code using Micropython libraries.
+
 Steps for setting up Micropython in your ESP32 device:
 1. Connect your esp32 with your computer using a USB cable
 2. Install Thonny Python IDE
