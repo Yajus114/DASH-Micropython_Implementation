@@ -3,7 +3,7 @@ Device Automation System for Homes (DASH) code using Micropython libraries.
 
 Steps for setting up Micropython in your ESP32 device:
 1. Connect your esp32 with your computer using a USB cable
-2. Install Thonny Python IDE
+2. Install Thonny Python IDE (https://thonny.org/)
 3. Go to Tools > Options > Interpreter
 4. In the top drop-down menu, select MicroPython (esp32), and in the port select the esp32-connected port
 5. Click Install or Update MicroPython (esptool) option at the bottom right
