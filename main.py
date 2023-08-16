@@ -9,7 +9,8 @@ _FIREBASE_URL = "YOUR_FIREBASE_URL"
 _MAX_ATTEMPT_LIMIT = 15
 _led = Pin(2, Pin.OUT)
 
-def _connect(_ssid: str, _key: str, _max_attempt_limit: int = _MAX_ATTEMPT_LIMIT, led = _led) -> bool:
+
+def _connect(_ssid: str, _key: str, _max_attempt_limit: int = _MAX_ATTEMPT_LIMIT, led=_led) -> bool:
     led.on()
     time.sleep(0.5)
     wlan = network.WLAN(network.STA_IF)
@@ -29,17 +30,21 @@ def _connect(_ssid: str, _key: str, _max_attempt_limit: int = _MAX_ATTEMPT_LIMIT
         led.off()
         return False
 
+
 def _set_firebase_connection(_path):
     try:
         firebase.setURL(_path)
     except:
         raise OSError("Connection to Firebase failed")
+
+
 def get_data(_path):
     try:
         firebase.get(_path, "res")
         return firebase.res
     except:
         raise OSError("Connection to Firebase failed")
+
 
 def get_data_shallow(_path):
     try:
@@ -48,7 +53,8 @@ def get_data_shallow(_path):
     except:
         raise OSError("Connection to Firebase failed")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     while True:
         if _connect(_SSID, _KEY):
             break
