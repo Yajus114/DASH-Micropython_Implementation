@@ -3,9 +3,9 @@ from machine import Pin
 import time, network
 from pprint import pprint
 
-_SSID = "YOUR_WIFI_SSID"
-_KEY = "YOUR_WIFI_PASSWORD"
-_FIREBASE_URL = "YOUR_FIREBASE_URL"
+_SSID = "e21 5g"
+_KEY = "a1b2c3d4e5f6"
+_FIREBASE_URL = "https://dash-24-default-rtdb.asia-southeast1.firebasedatabase.app/"
 _MAX_ATTEMPT_LIMIT = 15
 _led = Pin(2, Pin.OUT)
 
@@ -16,6 +16,10 @@ def _connect(_ssid: str, _key: str, _max_attempt_limit: int = _MAX_ATTEMPT_LIMIT
     wlan = network.WLAN(network.STA_IF)
     led.off()
     wlan.active(True)
+    if wlan.isconnected():
+        print("Already connected to " + _ssid)
+        led.on()
+        return True
     print("Attempting connection to " + _ssid + "...")
     wlan.connect(_ssid, _key)
     counter = time.time()
@@ -29,6 +33,12 @@ def _connect(_ssid: str, _key: str, _max_attempt_limit: int = _MAX_ATTEMPT_LIMIT
         print("Connection to " + _ssid + " failed: Maximum attempt limit reached.")
         led.off()
         return False
+
+
+def _disconnect():
+    wlan = network.WLAN(network.STA_IF)
+    wlan.disconnect()
+    wlan.active(False)
 
 
 def _set_firebase_connection(_path):
@@ -54,16 +64,19 @@ def get_data_shallow(_path):
         raise OSError("Connection to Firebase failed")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     while True:
         if _connect(_SSID, _KEY):
             break
         else:
             if str(input("Connect to WiFi? (y/n) ")) == "y":
+                # setup personal hotspot on the esp32
                 pass
             else:
                 print("Exiting...")
-                SystemExit()
+                exit(0)
     _set_firebase_connection(_FIREBASE_URL)
     pprint(get_data_shallow("devices"))
+    if str(input("Disconnect from WiFi? (y/n) ")) == "y":
+        _disconnect()
     # pprint(get_data("devices"))
