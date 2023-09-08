@@ -38,7 +38,7 @@ def _connect(_ssid: str, _key: str, _max_attempt_limit: int = _MAX_ATTEMPT_LIMIT
         return False
 
 
-def setup_access_point(led=_led) -> None:
+def _setup_access_point(led=_led) -> None:
     led.on()
     time.sleep(0.5)
     led.off()
@@ -90,7 +90,7 @@ if __name__ == '__main__':
                 # setup personal hotspot on the esp32
                 pass
             else:
-                setup_access_point()
+                _setup_access_point()
     _set_firebase_connection(_FIREBASE_URL)
     print(get_data_shallow("devices"))
     if str(input("Disconnect from WiFi? (y/n) ")) == "y":
