@@ -6,44 +6,48 @@ from machine import Pin
 
 import ufirebase as firebase
 
-_SSID = "YOUR_SSID_HERE"
-_KEY = "YOUR_KEY_HERE"
-_FIREBASE_URL = "YOUR_FIREBASE_RTDB_URL_HERE"
+
+_SSID = 'YOUR_WIFI_SSID'
+_KEY = 'YOUR_WIFI_KEY'
+_FIREBASE_URL = 'YOUR_FIREBASE_URL'
+
 _MAX_ATTEMPT_LIMIT = 15
 _led = Pin(2, Pin.OUT)
-_ap_gen_pwd = "".join(random.choice('abcdefghijklmnopqrstuvwxyz1234567890') for _ in range(8))
+_ap_gen_pwd = "".join(random.choice('abcdefghijklmnopqrstuvwxyz1234567890') for _ in
+                      range(8))  # random.mpy doesn't have random.choices for some reason
+_wlan_sta = network.WLAN(network.STA_IF)
+_wlan_ap = network.WLAN(network.AP_IF)
 
 
-def _connect(_ssid: str, _key: str, _max_attempt_limit: int = _MAX_ATTEMPT_LIMIT, led=_led) -> bool:
+def _connect(ssid: str, key: str, max_attempt_limit: int = _MAX_ATTEMPT_LIMIT, led=_led, wlan=_wlan_sta) -> bool:
     led.on()
     time.sleep(0.5)
-    wlan = network.WLAN(network.STA_IF)
     led.off()
     wlan.active(True)
     if wlan.isconnected():
-        print("Already connected to " + _ssid)
+        print("Already connected to " + ssid)
         led.on()
         return True
-    print("Attempting connection to '" + _ssid + "'...")
-    wlan.connect(_ssid, _key)
+    print("Attempting connection to '" + ssid + "'...")
+    wlan.connect(ssid, key)
     counter = time.time()
-    while not wlan.isconnected() and time.time() - counter < _max_attempt_limit:
+    while not wlan.isconnected() and time.time() - counter < max_attempt_limit:
         pass
     if wlan.isconnected():
-        print("Connected to '" + _ssid + "' successfully")
+        print("Connected to '" + ssid + "' successfully")
         led.on()
         return True
     else:
-        print("Connection to '" + _ssid + "' failed: Maximum attempt limit reached.")
+        print("Connection to '" + ssid + "' failed: Maximum attempt limit reached.")
         led.off()
+        wlan.active(False)
         return False
 
 
-def _setup_access_point(led=_led, ap_gen_pwd=_ap_gen_pwd) -> None:
+def _setup_access_point(led=_led, ap_gen_pwd=_ap_gen_pwd, wlan=_wlan_ap) -> None:
     led.on()
     time.sleep(0.5)
     led.off()
-    wlan = network.WLAN(network.AP_IF)
     wlan.active(True)
     wlan.config(essid="DASH Server-Connect",
                 password=ap_gen_pwd,
@@ -54,10 +58,13 @@ def _setup_access_point(led=_led, ap_gen_pwd=_ap_gen_pwd) -> None:
     print("Access point setup successfully.\nSSID: 'DASH Server-Connect', Password:", ap_gen_pwd)
 
 
-def _disconnect() -> None:
-    wlan = network.WLAN(network.STA_IF)
-    wlan.disconnect()
-    wlan.active(False)
+def _disconnect(wlan, led=_led) -> None:
+    try:
+        wlan.disconnect()
+        wlan.active(False)
+        led.off()
+    except Exception as e:
+        print(f"An error occurred: Couldn't disconnect.\n{e}")
 
 
 def _set_firebase_connection(_path: str):
@@ -89,16 +96,14 @@ if __name__ == '__main__':
             break
         else:
             if str(input("Connect to WiFi? (y/n) ")) == "y":
-                # setup personal hotspot on the esp32
-                pass
+                continue
             else:
                 _setup_access_point()
                 break
     try:
         _set_firebase_connection(_FIREBASE_URL)
-        print(get_data_shallow("devices"))
+        print(get_data("devices"))
     except OSError:
         print('Connection to Firebase failed.')
     if str(input("Disconnect from WiFi? (y/n) ")) == "y":
-        _disconnect()
-    # pprint(get_data("devices"))
+        _disconnect(_wlan_sta if _wlan_sta.active() else _wlan_ap)
