@@ -1,11 +1,14 @@
-import ufirebase as firebase
+import network
+import random
+import time
+
 from machine import Pin
-import time, network
-from pprint import pprint
+
+import ufirebase as firebase
 
 _SSID = "YOUR_WIFI_SSID"
 _KEY = "YOUR_WIFI_PASSWORD"
-_FIREBASE_URL = "YOUR_FIREBASE_URL"
+_FIREBASE_URL = "YOUR_FIREBASE_RTDB_URL"
 _MAX_ATTEMPT_LIMIT = 15
 _led = Pin(2, Pin.OUT)
 
@@ -33,6 +36,20 @@ def _connect(_ssid: str, _key: str, _max_attempt_limit: int = _MAX_ATTEMPT_LIMIT
         print("Connection to " + _ssid + " failed: Maximum attempt limit reached.")
         led.off()
         return False
+
+
+def setup_access_point(led=_led) -> None:
+    led.on()
+    time.sleep(0.5)
+    led.off()
+    wlan = network.WLAN(network.AP_IF)
+    wlan.active(True)
+    wlan.config(essid="ESP32",
+                password="".join(random.choice('abcdefghijklmnopqrstuvwxyz1234567890') for _ in range(8)))
+    while not wlan.active():
+        pass
+    led.on()
+    print("Access point setup successfully.\nSSID: ESP32, Password: " + wlan.config("password"))
 
 
 def _disconnect():
@@ -73,10 +90,9 @@ if __name__ == '__main__':
                 # setup personal hotspot on the esp32
                 pass
             else:
-                print("Exiting...")
-                exit(0)
+                setup_access_point()
     _set_firebase_connection(_FIREBASE_URL)
-    pprint(get_data_shallow("devices"))
+    print(get_data_shallow("devices"))
     if str(input("Disconnect from WiFi? (y/n) ")) == "y":
         _disconnect()
     # pprint(get_data("devices"))
